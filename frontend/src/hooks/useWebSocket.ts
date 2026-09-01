@@ -15,8 +15,9 @@ export function useWebSocket(teamId: string | null) {
   const connect = () => {
     if (!teamId || !token) return;
 
-    const wsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:8000';
-    ws.current = new WebSocket(`${wsUrl}/ws/teams/${teamId}?token=${token}`);
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = import.meta.env.VITE_WS_URL || `${protocol}//${window.location.host}`;
+    ws.current = new WebSocket(`${wsUrl}/ws/team/${teamId}?token=${token}`);
 
     ws.current.onopen = () => {
       setIsConnected(true);

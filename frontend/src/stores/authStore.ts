@@ -7,6 +7,7 @@ interface AuthState {
   user: User | null;
   token: string | null;
   isLoading: boolean;
+  isInitializing: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
   logout: () => void;
@@ -25,6 +26,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   token: localStorage.getItem('access_token'),
   isLoading: false,
+  isInitializing: !!localStorage.getItem('access_token'),
 
   login: async (email, password) => {
     set({ isLoading: true });
@@ -32,7 +34,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const res = await apiClient.post('/auth/login', { email, password });
       const { access_token, user } = res.data;
       localStorage.setItem('access_token', access_token);
-      set({ token: access_token, user });
+      set({ token: access_token, user, isInitializing: false });
       toast.success(`Welcome back, ${user.full_name || user.username}!`);
     } catch (error: unknown) {
       const err = error as { response?: { data?: { detail?: string } } };
@@ -49,7 +51,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const res = await apiClient.post('/auth/register', data);
       const { access_token, user } = res.data;
       localStorage.setItem('access_token', access_token);
-      set({ token: access_token, user });
+      set({ token: access_token, user, isInitializing: false });
       toast.success('Account created successfully!');
     } catch (error: unknown) {
       const err = error as { response?: { data?: { detail?: string } } };
@@ -66,17 +68,24 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       apiClient.post('/auth/logout').catch(() => {/* best effort */});
     }
     localStorage.removeItem('access_token');
-    set({ user: null, token: null });
+    set({ user: null, token: null, isInitializing: false });
     toast.success('Logged out successfully');
   },
 
   loadUser: async () => {
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+      set({ isInitializing: false });
+      return;
+    }
     try {
       const res = await apiClient.get('/auth/me');
-      set({ user: res.data });
+      set({ user: res.data, isInitializing: false });
     } catch {
-      get().logout();
+      localStorage.removeItem('access_token');
+      set({ user: null, token: null, isInitializing: false });
     }
   },
 }));
+
 
