@@ -13,9 +13,17 @@ class MessageBase(BaseModel):
 class MessageCreate(MessageBase):
     pass
 
+class MessageSentimentInfo(BaseModel):
+    sentiment: str
+    confidence: float
+
 class MessageResponse(MessageBase):
     id: uuid.UUID
     sender_id: uuid.UUID
+    sender_name: Optional[str] = None
+    sender_avatar: Optional[str] = None
+    sentiment: Optional[str] = None
+    sentiment_confidence: Optional[float] = None
     created_at: datetime
     updated_at: datetime
 
@@ -24,3 +32,4 @@ class MessageResponse(MessageBase):
 
 class ReactionCreate(BaseModel):
     emoji: str
+
