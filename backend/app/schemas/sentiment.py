@@ -3,15 +3,14 @@ import uuid
 from datetime import datetime, date
 
 class MessageSentimentResponse(BaseModel):
+    model_config = {"protected_namespaces": (), "from_attributes": True}
+
     id: uuid.UUID
     message_id: uuid.UUID
     sentiment: str
     confidence: float
     model_version: str | None
     created_at: datetime
-
-    class Config:
-        from_attributes = True
 
 class TeamSentimentMetricResponse(BaseModel):
     id: uuid.UUID
