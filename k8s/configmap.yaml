@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jelling-config
+  namespace: jelling
+data:
+  SENTIMENT_SERVICE_URL: "http://sentiment-service:8001"
+  JWT_ALGORITHM: "HS256"
+  JWT_EXPIRE_MINUTES: "60"
+  ENVIRONMENT: "production"
+  CORS_ORIGINS: '["http://jelling.local"]'

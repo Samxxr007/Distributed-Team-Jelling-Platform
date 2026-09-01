@@ -1,0 +1,84 @@
+version: "3.8"
+
+services:
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:80"
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    depends_on:
+      - backend
+    networks:
+      - jelling-network
+
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://jelling:jelling123@postgres:5432/jelling
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET_KEY: dev-secret-change-in-production
+      JWT_ALGORITHM: HS256
+      JWT_EXPIRE_MINUTES: 60
+      SENTIMENT_SERVICE_URL: http://sentiment-service:8001
+      ENVIRONMENT: development
+      CORS_ORIGINS: '["http://localhost:3000","http://frontend:3000"]'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - jelling-network
+
+  sentiment-service:
+    build: ./sentiment-service
+    ports:
+      - "8001:8001"
+    environment:
+      ENVIRONMENT: development
+    volumes:
+      - sentiment_model_cache:/root/.cache/huggingface
+    networks:
+      - jelling-network
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: jelling
+      POSTGRES_PASSWORD: jelling123
+      POSTGRES_DB: jelling
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/migrations/001_initial_schema.sql:/docker-entrypoint-initdb.d/01_schema.sql
+      - ./database/seeds/demo_data.sql:/docker-entrypoint-initdb.d/02_seed.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U jelling"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - jelling-network
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - jelling-network
+
+volumes:
+  postgres_data:
+  redis_data:
+  sentiment_model_cache:
+
+networks:
+  jelling-network:
+    driver: bridge

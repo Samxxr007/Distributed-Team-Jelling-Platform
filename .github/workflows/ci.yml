@@ -1,0 +1,83 @@
+name: CI/CD Pipeline
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  frontend-ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20
+      - run: npm ci
+        working-directory: frontend/
+      - run: npm run lint
+        working-directory: frontend/
+      - run: npm test
+        working-directory: frontend/
+      - run: npm run build
+        working-directory: frontend/
+      - uses: actions/upload-artifact@v3
+        with:
+          name: frontend-build
+          path: frontend/build/
+
+  backend-ci:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: testdb
+        ports:
+          - 5432:5432
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+      - run: pip install -r backend/requirements.txt
+      - run: pytest backend/tests/ -v --cov
+
+  ai-ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+      - run: pip install -r sentiment-service/requirements.txt
+      - run: pytest sentiment-service/tests/ -v
+
+  docker-build:
+    runs-on: ubuntu-latest
+    needs: [frontend-ci, backend-ci, ai-ci]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: docker/setup-buildx-action@v2
+      - run: docker build frontend/
+      - run: docker build backend/
+      - run: docker build sentiment-service/
+
+  security-scan:
+    runs-on: ubuntu-latest
+    needs: [docker-build]
+    steps:
+      - run: echo 'Trivy scan placeholder'
+
+  push-images:
+    runs-on: ubuntu-latest
+    needs: [security-scan]
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - run: echo 'Login and push to ghcr.io'
