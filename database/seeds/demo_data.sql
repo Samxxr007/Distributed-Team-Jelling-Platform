@@ -4,11 +4,11 @@ TRUNCATE TABLE users, teams, team_members, messages, message_sentiments, team_se
 -- 1. Insert 5 users
 -- Password for all is: password123 (bcrypt hash)
 INSERT INTO users (id, email, username, full_name, hashed_password, role, is_active) VALUES
-('11111111-1111-1111-1111-111111111111', 'admin@jelling.com', 'admin', 'Admin User', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewKFe.Kn7p5sXJ1e', 'admin', true),
-('22222222-2222-2222-2222-222222222222', 'alice@example.com', 'alice', 'Alice Johnson', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewKFe.Kn7p5sXJ1e', 'team_lead', true),
-('33333333-3333-3333-3333-333333333333', 'bob@example.com', 'bob', 'Bob Smith', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewKFe.Kn7p5sXJ1e', 'employee', true),
-('44444444-4444-4444-4444-444444444444', 'carol@example.com', 'carol', 'Carol Davis', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewKFe.Kn7p5sXJ1e', 'employee', true),
-('55555555-5555-5555-5555-555555555555', 'dave@example.com', 'dave', 'Dave Wilson', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewKFe.Kn7p5sXJ1e', 'employee', true);
+('11111111-1111-1111-1111-111111111111', 'admin@jelling.com', 'admin', 'Admin User', '$2b$12$ADPtcOBWqWqJu46Z4aYtV.Wu.DtdFAfondWltxEerBomKhGrrzOyC', 'admin', true),
+('22222222-2222-2222-2222-222222222222', 'alice@example.com', 'alice', 'Alice Johnson', '$2b$12$ADPtcOBWqWqJu46Z4aYtV.Wu.DtdFAfondWltxEerBomKhGrrzOyC', 'team_lead', true),
+('33333333-3333-3333-3333-333333333333', 'bob@example.com', 'bob', 'Bob Smith', '$2b$12$ADPtcOBWqWqJu46Z4aYtV.Wu.DtdFAfondWltxEerBomKhGrrzOyC', 'employee', true),
+('44444444-4444-4444-4444-444444444444', 'carol@example.com', 'carol', 'Carol Davis', '$2b$12$ADPtcOBWqWqJu46Z4aYtV.Wu.DtdFAfondWltxEerBomKhGrrzOyC', 'employee', true),
+('55555555-5555-5555-5555-555555555555', 'dave@example.com', 'dave', 'Dave Wilson', '$2b$12$ADPtcOBWqWqJu46Z4aYtV.Wu.DtdFAfondWltxEerBomKhGrrzOyC', 'employee', true);
 
 -- 2. Insert 2 teams
 INSERT INTO teams (id, name, description, invite_code, created_by) VALUES

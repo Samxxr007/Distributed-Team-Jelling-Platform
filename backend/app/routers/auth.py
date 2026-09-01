@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, func
 from fastapi.security import OAuth2PasswordBearer
 from app.database import get_db
 from app.models.user import User
@@ -75,8 +75,11 @@ async def register(user_in: UserCreate, db: AsyncSession = Depends(get_db)):
 @router.post("/login", response_model=TokenWithUser)
 async def login(credentials: UserLogin, db: AsyncSession = Depends(get_db)):
     """JSON body login — accepts email or username in the 'email' field."""
+    login_id = credentials.email.strip().lower()
     result = await db.execute(
-        select(User).where((User.email == credentials.email) | (User.username == credentials.email))
+        select(User).where(
+            (func.lower(User.email) == login_id) | (func.lower(User.username) == login_id)
+        )
     )
     user = result.scalar_one_or_none()
     if not user or not verify_password(credentials.password, user.hashed_password):
